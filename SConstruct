@@ -23,11 +23,11 @@ def CreateNewEnv():
 
     env.VariantDir('build', 'src', duplicate=0)
     sourceFiles = ["build/main.cpp",  "build/QuickSort.cpp"]
-
+    includeFiles = ["src/QuickSort.hpp"]
     env = ConfigPlatformEnv(env)
     prog = env.Program("build/QuickSortTest", sourceFiles)
 
-    env = ConfigPlatformIDE(env, sourceFiles, prog)
+    env = ConfigPlatformIDE(env, sourceFiles, includeFiles, prog)
 
     return env
 
@@ -78,15 +78,18 @@ def ConfigPlatformEnv(env):
 
     return env
 
-def ConfigPlatformIDE(env, sourceFiles, program):
+def ConfigPlatformIDE(env, sourceFiles, includeFiles, program):
     if platform == "linux" or platform == "linux2":
         print("Eclipse C++ project not implemented yet")
     elif platform == "darwin":
         print("XCode project not implemented yet")
     elif platform == "win32":
         files = []
+        incFiles = []
         for file in sourceFiles:
             files.append(re.sub("^build", "../src", file))
+        for file in includeFiles:
+            incFiles.append(os.path.abspath(Dir('.').abspath) + "/"  + file)
         buildSettings = {
             'LocalDebuggerCommand':os.path.abspath(Dir('.').abspath).replace('\\', '/') + "/build/QuickSortTest.exe",
             'LocalDebuggerWorkingDirectory':os.path.abspath(Dir('.').abspath).replace('\\', '/')+'/test',
@@ -94,6 +97,7 @@ def ConfigPlatformIDE(env, sourceFiles, program):
         }
         env.MSVSProject(target = 'VisualStudio/QuickSortTest' + env['MSVSPROJECTSUFFIX'],
                     srcs = files,
+                    incs = incFiles,
                     buildtarget = program,
                     DebugSettings = buildSettings,
                     variant = 'Debug|Win32')
